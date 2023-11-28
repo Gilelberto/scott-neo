@@ -200,6 +200,18 @@ def actualizar_nodo_emp(conexion, empno, nuevo_nombre=None, nueva_comision=None,
     )
     return conexion.query(query, parametros)
 
+
+def validar_existencia_manager(conexion, empno):
+    query = (
+        "MATCH (m:EMP {empno: $empno}) "
+        "RETURN COUNT(m) as count"
+    )
+    parametros = {"empno": empno}
+    resultado = conexion.query(query, parametros)
+    count = resultado[0]["count"] if resultado else 0
+    return count > 0
+
+
 def cambiar_valor_manager_empleado(conexion, empno, nuevo_manager):
     query = (
         "MATCH (e:EMP {empno: $empno}) "
@@ -209,18 +221,49 @@ def cambiar_valor_manager_empleado(conexion, empno, nuevo_manager):
     parametros = {"empno": empno, "nuevo_manager": nuevo_manager}
     return conexion.query(query, parametros)
 
-
-
 def actualizar_manager_empleado(conexion, empno, nuevo_manager):
+    if nuevo_manager:  # Verifica si nuevo_manager tiene un valor
+        if not validar_existencia_manager(conexion, nuevo_manager):
+            print("El ID del nuevo manager no existe en la base de datos.")
+            return
+        
+        # Eliminar la relación anterior del empleado con cualquier manager
+        eliminar_relacion_manager_anterior(conexion, empno)
+        
+        # Asignar el nuevo manager al empleado
+        query = (
+            "MATCH (e:EMP {empno: $empno}), (m:EMP {empno: $nuevo_manager}) "
+            "CREATE (e)-[:IS_SUBORDINATE_OF]->(m) "
+            "RETURN e"
+        )
+        parametros = {"empno": empno, "nuevo_manager": nuevo_manager}
+        cambiar_valor_manager_empleado(conexion, empno, nuevo_manager)
+        return conexion.query(query, parametros)
+    else:
+        # Si nuevo_manager está vacío, elimina cualquier relación existente del empleado con un manager
+        eliminar_relacion_manager_anterior(conexion, empno)
+        # Actualiza el valor del manager del empleado a un valor vacío en la base de datos
+        return cambiar_valor_manager_empleado(conexion, empno, None)
+
+def eliminar_relacion_manager_anterior(conexion, empno):
     query = (
-        "MATCH (e:EMP {empno: $empno}), (m:EMP {empno: $nuevo_manager}) "
-        "CREATE (e)-[r:REPORTS_TO]->(m) "
-        "RETURN r"
+        "MATCH (e:EMP {empno: $empno})-[r:IS_SUBORDINATE_OF]->(m:EMP) "
+        "DELETE r"
     )
-    parametros = {"empno": empno, "nuevo_manager": nuevo_manager}
-    cambiar_valor_manager_empleado(conexion,empno,nuevo_manager)
+    parametros = {"empno": empno}
     return conexion.query(query, parametros)
 
+
+
+def validar_existencia_departamento(conexion, deptno):
+    query = (
+        "MATCH (d:DEPT {deptno: $deptno}) "
+        "RETURN COUNT(d) as count"
+    )
+    parametros = {"deptno": deptno}
+    resultado = conexion.query(query, parametros)
+    count = resultado[0]["count"] if resultado else 0
+    return count > 0
 
 def cambiar_valor_departamento_empleado(conexion, empno, nuevo_departamento):
     query = (
@@ -231,8 +274,15 @@ def cambiar_valor_departamento_empleado(conexion, empno, nuevo_departamento):
     parametros = {"empno": empno, "nuevo_departamento": nuevo_departamento}
     return conexion.query(query, parametros)
 
-
 def actualizar_departamento_empleado(conexion, empno, nuevo_departamento):
+    if not validar_existencia_departamento(conexion, nuevo_departamento):
+        print("El ID del nuevo departamento no existe en la base de datos.")
+        return
+    
+    # Eliminar la relación anterior del empleado con cualquier departamento
+    eliminar_relacion_departamento_anterior(conexion, empno)
+    
+    # Asignar el nuevo departamento al empleado
     query = (
         "MATCH (e:EMP {empno: $empno}), (d:DEPT {deptno: $nuevo_departamento}) "
         "CREATE (e)-[:WORKS_AT]->(d) "
@@ -241,6 +291,15 @@ def actualizar_departamento_empleado(conexion, empno, nuevo_departamento):
     parametros = {"empno": empno, "nuevo_departamento": nuevo_departamento}
     cambiar_valor_departamento_empleado(conexion, empno, nuevo_departamento)
     return conexion.query(query, parametros)
+
+def eliminar_relacion_departamento_anterior(conexion, empno):
+    query = (
+        "MATCH (e:EMP {empno: $empno})-[r:WORKS_AT]->(d:DEPT) "
+        "DELETE r"
+    )
+    parametros = {"empno": empno}
+    return conexion.query(query, parametros)
+
 
 
 

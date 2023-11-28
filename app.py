@@ -143,8 +143,14 @@ while True:
                     if aux == 1:
                         #manager
                         empno = int(input("Ingrese el número de empleado: "))
-                        num = int(input("Ingrese el número de empleado del nuevo manager: "))
-                        api.actualizar_manager_empleado(conexion, empno, num)
+                        nuevo_manager = input("Ingrese el número de empleado del nuevo manager (o deje vacío para eliminar el manager actual): ")
+    
+                        if nuevo_manager.strip():  
+                            num = int(nuevo_manager)
+                            api.actualizar_manager_empleado(conexion, empno, num)
+                        else:
+                            # Si el input está vacío, asigna un valor vacío al nuevo manager
+                            api.actualizar_manager_empleado(conexion, empno, None)
 
                     if aux == 2:
                         #departamento
