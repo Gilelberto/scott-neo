@@ -116,9 +116,11 @@ while True:
             print("Leer")
             nodo_tipo = seleccionar_tipo()
             if nodo_tipo == "DEPT":
-                pass
+                deptno = int(input("Ingrese el numero de departamento: "))
+                api.obtener_datos_nodo_dept_y_empleados(conexion,deptno)
             if nodo_tipo == "EMP":
-                pass
+                empno = int(input("Ingrese el numero de empleado: "))
+                api.obtener_datos_nodo_emp(conexion,empno)
         if opt == 3:
             print("Actualizar")
             nodo_tipo = seleccionar_tipo()

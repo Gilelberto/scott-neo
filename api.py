@@ -87,3 +87,66 @@ def eliminar_nodo(conexion, nodo_label, propiedad, valor):
     )
     parametros = {"valor": valor}
     return conexion.query(query, parametros)
+
+
+def obtener_datos_nodo_emp(conexion, empno):
+    query = (
+        "MATCH (emp:EMP {empno: $empno})"
+        "RETURN emp"
+    )
+    parametros = {"empno": empno}
+    resultados = conexion.query(query, parametros)
+
+    if not resultados:
+        print(f"No se encontró un nodo EMP con el número de empleado {empno}.")
+        return
+
+    nodo_emp = resultados[0]['emp']
+
+    print(f"Datos del nodo EMP con número de empleado {empno}:")
+    print(f"Número de Empleado: {nodo_emp['empno']}")
+    print(f"Nombre: {nodo_emp['ename']}")
+    print(f"Puesto: {nodo_emp['job']}")
+    print(f"Fecha de Contratación: {nodo_emp['hiredate']}")
+    print(f"Salario: {nodo_emp['sal']}")
+    print(f"Comisión: {nodo_emp['comm']}")
+    print(f"Número de Departamento: {nodo_emp['deptno']}")
+
+    return nodo_emp
+
+
+def obtener_datos_nodo_dept_y_empleados(conexion, deptno):
+    query = (
+        "MATCH (dept:DEPT {deptno: $deptno})"
+        "OPTIONAL MATCH (dept)<-[:WORKS_AT]-(emp:EMP)"
+        "RETURN dept, COLLECT(emp) AS empleados"
+    )
+    parametros = {"deptno": deptno}
+    resultados = conexion.query(query, parametros)
+
+    if not resultados:
+        print(f"No se encontró un nodo DEPT con el número de departamento {deptno}.")
+        return
+
+    nodo_dept = resultados[0]['dept']
+    empleados = resultados[0]['empleados']
+
+    print(f"Datos del nodo DEPT con número de departamento {deptno}:")
+    print(f"Número de Departamento: {nodo_dept['deptno']}")
+    print(f"Nombre: {nodo_dept['dname']}")
+    print(f"Ubicación: {nodo_dept['loc']}")
+    print("\nEmpleados en este departamento:")
+
+    for empleado in empleados:
+        if empleado is not None:
+            print(f"  Número de Empleado: {empleado['empno']}")
+            print(f"  Nombre: {empleado['ename']}")
+            print(f"  Puesto: {empleado['job']}")
+            print(f"  Fecha de Contratación: {empleado['hiredate']}")
+            print(f"  Salario: {empleado['sal']}")
+            print(f"  Comisión: {empleado['comm']}")
+            print(f"  -------------------------")
+        else:
+            print("  No hay empleados asociados a este departamento.")
+
+    return nodo_dept, empleados
