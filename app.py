@@ -141,6 +141,7 @@ while True:
             break
 
         input("Pulse cualquier tecla para continuar...")
-    except:
-        print("Se produjo algún error.")
+    except Exception as error:
+    # Capturamos cualquier excepción y la almacenamos en la variable 'error'
+        print(f"Error: {error}")
 conexion.close()

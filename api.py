@@ -7,7 +7,7 @@ def crear_nodo_dept(conexion, deptno, dname, loc):
     return conexion.query(query, parametros)
 
 def crear_nodo_emp(conexion,empno, ename, job, mgr, hiredate, sal, comm, deptno):
-    if mgr != None:
+    if mgr != '':
         mgr = int(mgr)
     query = (
         "CREATE (emp:EMP {empno: $empno,ename: $ename, job: $job, mgr: $mgr, hiredate: $hiredate, sal: $sal, comm: $comm, deptno: $deptno})"
@@ -19,7 +19,7 @@ def crear_nodo_emp(conexion,empno, ename, job, mgr, hiredate, sal, comm, deptno)
     #crear relación a departamento
     crear_relacion_emp_trabaja_en_departamento(conexion,empno,deptno)
 
-    if mgr != None:
+    if mgr != '':
         crear_relacion_manager(conexion,empno,mgr)
     
     return nodo_res
