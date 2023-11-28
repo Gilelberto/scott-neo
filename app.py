@@ -122,12 +122,31 @@ while True:
                 empno = int(input("Ingrese el numero de empleado: "))
                 api.obtener_datos_nodo_emp(conexion,empno)
         if opt == 3:
-            print("Actualizar")
             nodo_tipo = seleccionar_tipo()
             if nodo_tipo == "DEPT":
-                pass
+                deptno = int(input("Ingrese el número de departamento"))
+                dname = input("Ingrese el nuevo nombre (vacío para no actualizar)")
+                loc = input("INgrese la nueva localización")
+                #actualizar
             if nodo_tipo == "EMP":
-                pass
+                tipo = ""
+                input("Actualizar nodo o relación? \n1)Nodo\n2)Relación\nSu opción: ")
+                if tipo == 1:
+                    empno = int(input("Ingrese el número del empleado"))
+                    ename = input("Ingrese nombre (vacío para no cambiar)")
+                    comm = input("Ingrese la comisión (vacío para no cambiar)")
+                    job = input("Ingrese el nombre del trabajo (vacío para no actualizar): ")
+                    salary = input("Ingrese el salario (vacío para no actualizar): ")
+                if tipo == 2:
+                    aux = int(input("Desea cambiar manager o departamento?\n1)Manager\n2)Departamento\nSu opción: "))
+                    if aux == 1:
+                        #manager
+                        num = int(input("Ingrese el número de empleado del nuevo manager: "))
+                        pass
+                    if aux == 2:
+                        #departamento
+                        num = int(input("Ingrese el número de empleado del nuevo departamento: "))
+                        pass
         if opt == 4:
             print("Eliminar")
             nodo_tipo = seleccionar_tipo()
