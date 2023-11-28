@@ -221,10 +221,27 @@ def cambiar_valor_manager_empleado(conexion, empno, nuevo_manager):
     parametros = {"empno": empno, "nuevo_manager": nuevo_manager}
     return conexion.query(query, parametros)
 
+
+def tiene_subordinados(conexion, empno):
+    query = (
+        "MATCH (e:EMP {empno: $empno})<-[r:IS_SUBORDINATE_OF]-(sub:EMP) "
+        "RETURN COUNT(sub) as count"
+    )
+    parametros = {"empno": empno}
+    resultado = conexion.query(query, parametros)
+    count = resultado[0]["count"] if resultado else 0
+    return count > 0
+
+
 def actualizar_manager_empleado(conexion, empno, nuevo_manager):
     if nuevo_manager:  # Verifica si nuevo_manager tiene un valor
         if not validar_existencia_manager(conexion, nuevo_manager):
             print("El ID del nuevo manager no existe en la base de datos.")
+            return
+        
+        # Verificar si el nuevo manager tiene subordinados que son el empleado actual
+        if tiene_subordinados(conexion, empno):
+            print("El empleado actual se encuentra entre los subordinados del nuevo manager.")
             return
         
         # Eliminar la relación anterior del empleado con cualquier manager
@@ -245,6 +262,7 @@ def actualizar_manager_empleado(conexion, empno, nuevo_manager):
         # Actualiza el valor del manager del empleado a un valor vacío en la base de datos
         return cambiar_valor_manager_empleado(conexion, empno, None)
 
+
 def eliminar_relacion_manager_anterior(conexion, empno):
     query = (
         "MATCH (e:EMP {empno: $empno})-[r:IS_SUBORDINATE_OF]->(m:EMP) "
@@ -252,6 +270,9 @@ def eliminar_relacion_manager_anterior(conexion, empno):
     )
     parametros = {"empno": empno}
     return conexion.query(query, parametros)
+
+
+
 
 
 
