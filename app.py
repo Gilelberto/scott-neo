@@ -128,25 +128,29 @@ while True:
                 dname = input("Ingrese el nuevo nombre (vacío para no actualizar)")
                 loc = input("INgrese la nueva localización")
                 #actualizar
+                api.actualizar_nodo_dept(conexion,deptno,dname,loc)
             if nodo_tipo == "EMP":
-                tipo = ""
-                input("Actualizar nodo o relación? \n1)Nodo\n2)Relación\nSu opción: ")
+                tipo = int(input("Actualizar nodo o relación? \n1)Nodo\n2)Relación\nSu opción: "))
                 if tipo == 1:
                     empno = int(input("Ingrese el número del empleado"))
                     ename = input("Ingrese nombre (vacío para no cambiar)")
                     comm = input("Ingrese la comisión (vacío para no cambiar)")
                     job = input("Ingrese el nombre del trabajo (vacío para no actualizar): ")
                     salary = input("Ingrese el salario (vacío para no actualizar): ")
+                    api.actualizar_nodo_emp(conexion, empno,ename if ename != '' else None,comm if comm != '' else None,job if job != '' else None,salary if salary != '' else None)
                 if tipo == 2:
                     aux = int(input("Desea cambiar manager o departamento?\n1)Manager\n2)Departamento\nSu opción: "))
                     if aux == 1:
                         #manager
+                        empno = int(input("Ingrese el número de empleado: "))
                         num = int(input("Ingrese el número de empleado del nuevo manager: "))
-                        pass
+                        api.actualizar_manager_empleado(conexion, empno, num)
+
                     if aux == 2:
                         #departamento
-                        num = int(input("Ingrese el número de empleado del nuevo departamento: "))
-                        pass
+                        empno = int(input("Ingrese el número de empleado: "))
+                        num = int(input("Ingrese el número del nuevo departamento: "))
+                        api.actualizar_departamento_empleado(conexion, empno, num)
         if opt == 4:
             print("Eliminar")
             nodo_tipo = seleccionar_tipo()

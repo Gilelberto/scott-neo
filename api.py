@@ -150,3 +150,97 @@ def obtener_datos_nodo_dept_y_empleados(conexion, deptno):
             print("  No hay empleados asociados a este departamento.")
 
     return nodo_dept, empleados
+
+
+
+def actualizar_nodo_dept(conexion, deptno, nuevo_nombre, nueva_loc):
+    set_query = ""
+    parametros = {"deptno": deptno}
+
+    if nuevo_nombre:
+        set_query += "SET dept.dname = $nuevo_nombre "
+        parametros["nuevo_nombre"] = nuevo_nombre
+
+    if nueva_loc:
+        set_query += "SET dept.loc = $nueva_loc "
+        parametros["nueva_loc"] = nueva_loc
+
+    query = (
+        f"MATCH (dept:DEPT {{deptno: $deptno}}) "
+        f"{set_query} "
+        "RETURN dept"
+    )
+    return conexion.query(query, parametros)
+
+
+def actualizar_nodo_emp(conexion, empno, nuevo_nombre=None, nueva_comision=None, nuevo_trabajo=None, nuevo_salario=None):
+    set_query = ""
+    parametros = {"empno": empno}
+
+    if nuevo_nombre is not None:
+        set_query += "SET emp.ename = $nuevo_nombre "
+        parametros["nuevo_nombre"] = nuevo_nombre
+
+    if nueva_comision is not None:
+        set_query += "SET emp.comm = $nueva_comision "
+        parametros["nueva_comision"] = nueva_comision
+
+    if nuevo_trabajo is not None:
+        set_query += "SET emp.job = $nuevo_trabajo "
+        parametros["nuevo_trabajo"] = nuevo_trabajo
+
+    if nuevo_salario is not None:
+        set_query += "SET emp.sal = $nuevo_salario "
+        parametros["nuevo_salario"] = nuevo_salario
+
+    query = (
+        f"MATCH (emp:EMP {{empno: $empno}}) "
+        f"{set_query} "
+        "RETURN emp"
+    )
+    return conexion.query(query, parametros)
+
+def cambiar_valor_manager_empleado(conexion, empno, nuevo_manager):
+    query = (
+        "MATCH (e:EMP {empno: $empno}) "
+        "SET e.mgr = $nuevo_manager "
+        "RETURN e"
+    )
+    parametros = {"empno": empno, "nuevo_manager": nuevo_manager}
+    return conexion.query(query, parametros)
+
+
+
+def actualizar_manager_empleado(conexion, empno, nuevo_manager):
+    query = (
+        "MATCH (e:EMP {empno: $empno}), (m:EMP {empno: $nuevo_manager}) "
+        "CREATE (e)-[r:REPORTS_TO]->(m) "
+        "RETURN r"
+    )
+    parametros = {"empno": empno, "nuevo_manager": nuevo_manager}
+    cambiar_valor_manager_empleado(conexion,empno,nuevo_manager)
+    return conexion.query(query, parametros)
+
+
+def cambiar_valor_departamento_empleado(conexion, empno, nuevo_departamento):
+    query = (
+        "MATCH (e:EMP {empno: $empno}) "
+        "SET e.deptno = $nuevo_departamento "
+        "RETURN e"
+    )
+    parametros = {"empno": empno, "nuevo_departamento": nuevo_departamento}
+    return conexion.query(query, parametros)
+
+
+def actualizar_departamento_empleado(conexion, empno, nuevo_departamento):
+    query = (
+        "MATCH (e:EMP {empno: $empno}), (d:DEPT {deptno: $nuevo_departamento}) "
+        "CREATE (e)-[:WORKS_AT]->(d) "
+        "RETURN e"
+    )
+    parametros = {"empno": empno, "nuevo_departamento": nuevo_departamento}
+    cambiar_valor_departamento_empleado(conexion, empno, nuevo_departamento)
+    return conexion.query(query, parametros)
+
+
+
